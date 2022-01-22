@@ -10,14 +10,23 @@ import UIKit
 class ViewController: UIViewController, UIGestureRecognizerDelegate {
     
     
-    @IBOutlet weak var tempView: UIView!
-    
-    @IBOutlet weak var tempImageView: UIImageView!
-    
+    var tempView: UIView!
+    var panGesture: UIPanGestureRecognizer!
+    @IBOutlet var tempImageView: UIImageView!
     var trayOriginalCenter: CGPoint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let x1 = tempImageView.frame.minX + (tempImageView.frame.width/2)
+        let y1 = tempImageView.frame.minY + (tempImageView.frame.height/2)
+        
+        self.tempView = UIView(frame: CGRect(x: x1-40, y: y1-40, width: 40, height: 40))
+        self.tempView.backgroundColor = .yellow
+        self.view.addSubview(self.tempView)
+        self.panGesture = UIPanGestureRecognizer(target: self, action: #selector(didPanTray(_:)))
+        self.panGesture.delegate = self
+        self.tempView.addGestureRecognizer(self.panGesture)
+        
         self.tempView.isUserInteractionEnabled = true
         self.tempView.isMultipleTouchEnabled = true
         
@@ -28,18 +37,18 @@ class ViewController: UIViewController, UIGestureRecognizerDelegate {
         return true
     }
     
-    @IBAction func didPanTray(_ sender: UIPanGestureRecognizer) {
+    @objc func didPanTray(_ sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: self.view)
-        
-        if translation.x >= 0 && translation.y >= 0  {
+        let center = self.tempImageView.center
             if sender.state == .began {
                 trayOriginalCenter = tempView.center
             } else if sender.state == .changed {
-                tempView.center = CGPoint(x: trayOriginalCenter.x + translation.x, y: trayOriginalCenter.y + translation.y)
+                if self.tempImageView.frame.contains(self.tempView.frame) {
+                    tempView.center = CGPoint(x: trayOriginalCenter.x + translation.x, y: trayOriginalCenter.y + translation.y)
+                } else {
+                    tempView.center = center
+                }
             }
-        }
     }
-    
-    
 }
 
